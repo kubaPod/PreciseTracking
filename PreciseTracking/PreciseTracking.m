@@ -33,7 +33,7 @@ Begin["`Private`"];
     ,  $TrackedTargets = <||>
   ];
 
-  TrackTarget // Attributes = HoldAll;
+  TrackTarget // Attributes = {HoldAll, Listable};
 
   TrackTarget[sym_[key_]]:= Catch @ With[
     { id   = First @ ValueTrack`GetTrackingState[]
@@ -63,7 +63,8 @@ Begin["`Private`"];
 
   PreciseDynamic // Attributes = HoldAll;
 
-  PreciseDynamic[expr_, sym_[key_]]:= Dynamic[TrackTarget[sym[key]]; expr, TrackedSymbols:>{}];
+  PreciseDynamic[expr_, target_]:= Dynamic[TrackTarget[target]; expr, TrackedSymbols:>{}];
+
   PreciseDynamic[sym_[key_]]:= PreciseDynamic[sym[key],sym[key]]
 
 
