@@ -21,26 +21,64 @@
 
 BeginPackage["PreciseTracking`"];
 
-Unprotect["`*", "`*`*"]
+
 ClearAll["`*", "`*`*"]
 
-(* Needs and exported symbols here *)
+  ToTrackedAssociation;
+  PreciseDynamic;
 
 Begin["`Private`"];
 
+  If[ Not @ TrueQ @ AssociationQ @ $TrackedTargets
+    ,  $TrackedTargets = <||>
+  ];
+
+  TrackTarget // Attributes = HoldAll;
+
+  TrackTarget[sym_[key_]]:= Catch @ With[
+    { id   = First @ ValueTrack`GetTrackingState[]
+    , bin := $TrackedTargets
+    , root = Hold[sym]
+    }
+  , Lookup[bin, root, bin[root]=<|key -> {id}|>; Throw @ {id} ] (*initialize storage if needed*)
+  ; If[
+      FreeQ[id] @ Lookup[bin[root], key, bin[root, key] = {}]
+    , AppendTo[bin[root, key], id]
+    ]
+  ]
+
+  UpdateTarget // Attributes = HoldAll;
+
+  UpdateTarget[sym_[key_]]:= With[
+    { root = Hold[sym]
+    , bin := $TrackedTargets
+    }
+  , { ids = Lookup[bin[root], key, {}] /. {} :> Return[Null, With]}
+
+  , bin[root, key] = {}
+  ; CallPacket @ FrontEndExecute @ FrontEnd`UpdateDynamicObjects @ ids
+  ]
 
 
-(* ::Chapter:: *)
-(* Implementation code*)
+
+  PreciseDynamic // Attributes = HoldAll;
+
+  PreciseDynamic[expr_, sym_[key_]]:= Dynamic[TrackTarget[sym[key]]; expr, TrackedSymbols:>{}];
+  PreciseDynamic[sym_[key_]]:= PreciseDynamic[sym[key],sym[key]]
 
 
-(*implementation goes here*)
 
+  ToTrackedAssociation // Attributes = {HoldFirst};
 
-
-(* ::Chapter:: *)
-(* End package*)
-
+  ToTrackedAssociation[sym_Symbol]:=Module[
+    {   $inside = False }
+    , sym /: Set[sym[key_], val_] /; !TrueQ@$inside :=Block[
+      {$inside = True, $old = sym[key]}
+      , sym[key]=val
+      ; If[ $old != val, UpdateTarget[sym[key]] ]
+      ; val
+    ]
+  ]
 
 End[];
 
