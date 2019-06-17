@@ -2,6 +2,7 @@
 
 Fine grained Dynamic updating for Mathematica
 
+## Introduction
 
 `Dynamic` can only track symbols mutations so if you move the slider in:
     
@@ -28,6 +29,15 @@ User does not need to worry about that, only to specify what should be tracked:
     
     PreciseDynamic[Print@"a"; asso["a"], asso["a"]] (*second argument serves like a 'TrackedTarget'*)
     PreciseDynamic[Print@"b"; asso["b"], asso["b"]]
+    
+## TODO    
+
+- [x] support for simple 'flat' associations
+- [x] track many targets
+- [ ] two-way `PreciseDynamic`, e.g. proper behavior for `Slider @ PreciseDynamic @ ...`
+- [ ] handle kernel quit/restart
+- [ ] support for nested associations
+- [ ] robustness measures, don't reapply `ToTrackedAssociation` etc
 
 ## Installation
  
