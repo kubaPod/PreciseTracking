@@ -34,6 +34,7 @@ User does not need to worry about that, only to specify what should be tracked:
 
 - [x] support for simple 'flat' associations
 - [x] track many targets
+- [x] do not update if value didn't change
 - [ ] two-way `PreciseDynamic`, e.g. proper behavior for `Slider @ PreciseDynamic @ ...`
 - [ ] handle kernel quit/restart
 - [ ] support for nested associations
